@@ -166,11 +166,7 @@ func Format(message Message) (string, error) {
 		for _, trailer := range trailers {
 			trailerLines = append(trailerLines, trailer.Token+": "+trailer.Value)
 		}
-		if len(sections) == 1 {
-			sections = append(sections, strings.Join(trailerLines, "\n"))
-		} else {
-			sections[len(sections)-1] += "\n" + strings.Join(trailerLines, "\n")
-		}
+		sections = append(sections, strings.Join(trailerLines, "\n"))
 	}
 	return strings.Join(sections, "\n\n") + "\n", nil
 }

@@ -18,7 +18,7 @@ Allowed types are `build`, `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refact
 
 The normalizer infers `feat` from `add`, `implement`, `introduce`, or `support` subjects. It infers `fix` from `fix`, `bug`, `repair`, `resolve`, or `handle` subjects. It maps common first words to the other allowed types and uses `chore` by default.
 
-The body starts after one blank line. Body paragraphs wrap at 72 characters. The normalizer preserves body content that it can repair without data loss.
+The body starts after one blank line. Body paragraphs wrap at 72 characters. Trailers start after one blank line and remain at the end. The normalizer preserves body content that it can repair without data loss.
 
 ## Trailers
 

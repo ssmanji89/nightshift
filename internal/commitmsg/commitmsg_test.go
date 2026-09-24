@@ -18,7 +18,8 @@ func TestNormalize(t *testing.T) {
 		{"punctuation cleanup", "feat: Add the API!\n", "feat: add the api\n"},
 		{"body spacing and wrapping", "fix: repair login\nbody line   with extra spaces\n\n\n", "fix: repair login\n\nbody line with extra spaces\n"},
 		{"breaking changes", "feat!: replace the config format\n\nBREAKING CHANGE: migrate existing files\n", "feat!: replace the config format\n\nBREAKING CHANGE: migrate existing files\n"},
-		{"trailer preservation", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\nNightshift-Ref: https://github.com/marcus/nightshift\n", "fix: repair login\n\nbody\nNightshift-Task: commit-normalize\nNightshift-Ref: https://github.com/marcus/nightshift\n"},
+		{"trailer preservation", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\nNightshift-Ref: https://github.com/marcus/nightshift\n", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\nNightshift-Ref: https://github.com/marcus/nightshift\n"},
+		{"trailer block has a blank line after the body", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\n", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\n"},
 		{"duplicate trailer removal", "fix: repair login\n\nSigned-off-by: A\nSigned-off-by: B\n", "fix: repair login\n\nSigned-off-by: A\n"},
 	}
 	for _, test := range tests {

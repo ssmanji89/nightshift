@@ -18,4 +18,5 @@ if command -v nightshift >/dev/null 2>&1 && nightshift commit-msg --help >/dev/n
 	exec nightshift commit-msg "$1"
 fi
 
-exec go run "$repo_root/cmd/nightshift" commit-msg "$1"
+cd "$repo_root"
+exec go run ./cmd/nightshift commit-msg "$1"

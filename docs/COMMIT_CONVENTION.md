@@ -22,7 +22,7 @@ The body starts after one blank line. Body paragraphs wrap at 72 characters. Tra
 
 ## Trailers
 
-Trailers remain at the end of the message. The normalizer preserves the first trailer for each case-insensitive token and removes later duplicates. It preserves trailer values, including `Nightshift-Task` and `Nightshift-Ref`.
+Trailers remain at the end of the message. The normalizer removes later exact duplicates for each case-insensitive token and preserves distinct values. It preserves trailer values, including `Nightshift-Task` and `Nightshift-Ref`.
 
 Breaking changes can use either `!` in the subject or a `BREAKING CHANGE` trailer. The normalizer adds `!` when a breaking trailer exists.
 

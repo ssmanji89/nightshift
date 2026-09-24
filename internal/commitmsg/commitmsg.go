@@ -70,7 +70,7 @@ func Parse(input string) (Message, error) {
 
 	subject := strings.TrimSpace(lines[0])
 	message := Message{}
-	if matches := conventionalPattern.FindStringSubmatch(subject); matches != nil {
+	if matches := conventionalPattern.FindStringSubmatch(subject); matches != nil && isConventionalType(matches[1]) {
 		message.Type = strings.ToLower(matches[1])
 		if _, ok := allowedTypes[message.Type]; !ok {
 			return Message{}, fmt.Errorf("%w: unsupported type %q", ErrInvalidMessage, matches[1])
@@ -180,7 +180,27 @@ func looksLikeConventionalSubject(subject string) bool {
 	if prefix == "" {
 		return false
 	}
-	return !strings.ContainsAny(prefix, " \t")
+	if strings.ContainsAny(prefix, " \t") {
+		return false
+	}
+	lower := strings.ToLower(prefix)
+	if _, ok := allowedTypes[lower]; ok {
+		return true
+	}
+	if strings.HasSuffix(lower, "!") {
+		_, ok := allowedTypes[strings.TrimSuffix(lower, "!")]
+		return ok
+	}
+	if open := strings.IndexByte(lower, '('); open > 0 && strings.HasSuffix(lower, ")") {
+		_, ok := allowedTypes[lower[:open]]
+		return ok
+	}
+	return false
+}
+
+func isConventionalType(typeName string) bool {
+	_, ok := allowedTypes[strings.ToLower(typeName)]
+	return ok || typeName == strings.ToLower(typeName)
 }
 
 func normalizeScope(scope string) string {
@@ -190,7 +210,6 @@ func normalizeScope(scope string) string {
 
 func normalizeDescription(description string) string {
 	description = strings.ToLower(strings.Join(strings.Fields(description), " "))
-	description = strings.TrimLeftFunc(description, unicode.IsPunct)
 	description = strings.TrimRightFunc(description, func(r rune) bool {
 		return unicode.IsPunct(r) || unicode.IsSpace(r)
 	})
@@ -301,7 +320,7 @@ func deduplicateTrailers(trailers []Trailer) []Trailer {
 	for _, trailer := range trailers {
 		trailer.Token = strings.TrimSpace(trailer.Token)
 		trailer.Value = strings.TrimSpace(trailer.Value)
-		key := strings.ToLower(trailer.Token)
+		key := strings.ToLower(trailer.Token) + "\x00" + trailer.Value
 		if trailer.Token == "" || trailer.Value == "" {
 			continue
 		}
@@ -326,26 +345,19 @@ func normalizeBody(lines []string) []string {
 	}
 
 	result := make([]string, 0, len(lines))
-	paragraph := make([]string, 0)
-	flush := func() {
-		if len(paragraph) == 0 {
-			return
-		}
-		result = append(result, wrapParagraph(paragraph)...)
-		paragraph = paragraph[:0]
-	}
 	for _, line := range lines {
-		line = strings.TrimRightFunc(line, unicode.IsSpace)
 		if strings.TrimSpace(line) == "" {
-			flush()
 			if len(result) > 0 && result[len(result)-1] != "" {
 				result = append(result, "")
 			}
 			continue
 		}
-		paragraph = append(paragraph, line)
+		if runeLen(line) <= SubjectLimit {
+			result = append(result, line)
+			continue
+		}
+		result = append(result, wrapParagraph([]string{line})...)
 	}
-	flush()
 	for len(result) > 0 && result[len(result)-1] == "" {
 		result = result[:len(result)-1]
 	}

@@ -14,13 +14,17 @@ func TestNormalize(t *testing.T) {
 	}{
 		{"conventional input is idempotent", "feat(parser): add support\n", "feat(parser): add support\n"},
 		{"bare subject", "Improve the setup flow\n", "chore: improve the setup flow\n"},
+		{"bare subject with colon", "URL: preserve the endpoint\n", "chore: url: preserve the endpoint\n"},
 		{"inferred types", "Fix broken login\n", "fix: broken login\n"},
 		{"punctuation cleanup", "feat: Add the API!\n", "feat: add the api\n"},
-		{"body spacing and wrapping", "fix: repair login\nbody line   with extra spaces\n\n\n", "fix: repair login\n\nbody line with extra spaces\n"},
+		{"body spacing and wrapping", "fix: repair login\nbody line   with extra spaces\n\n\n", "fix: repair login\n\nbody line   with extra spaces\n"},
 		{"breaking changes", "feat!: replace the config format\n\nBREAKING CHANGE: migrate existing files\n", "feat!: replace the config format\n\nBREAKING CHANGE: migrate existing files\n"},
 		{"trailer preservation", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\nNightshift-Ref: https://github.com/marcus/nightshift\n", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\nNightshift-Ref: https://github.com/marcus/nightshift\n"},
 		{"trailer block has a blank line after the body", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\n", "fix: repair login\n\nbody\n\nNightshift-Task: commit-normalize\n"},
-		{"duplicate trailer removal", "fix: repair login\n\nSigned-off-by: A\nSigned-off-by: B\n", "fix: repair login\n\nSigned-off-by: A\n"},
+		{"duplicate trailer removal", "fix: repair login\n\nSigned-off-by: A\nSigned-off-by: A\n", "fix: repair login\n\nSigned-off-by: A\n"},
+		{"preserve leading description punctuation", "fix: #123 crash!\n", "fix: #123 crash\n"},
+		{"preserve distinct repeated trailers", "feat: add authors\n\nCo-authored-by: A <a@example.com>\nCo-authored-by: B <b@example.com>\n", "feat: add authors\n\nCo-authored-by: A <a@example.com>\nCo-authored-by: B <b@example.com>\n"},
+		{"preserve body formatting", "fix: repair login\n\nUse two  spaces:\n  code:  value\n", "fix: repair login\n\nUse two  spaces:\n  code:  value\n"},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
